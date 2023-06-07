@@ -15,10 +15,12 @@ This is a python program that allows you to find solutions for a game in which y
 <img src="./Pictures/Valid moves.png" width="25%" align="right">
 The game this is based on has a few rules. You start with some flasks that contain balls, the balls are all stacked ontop of each other making it a single list from top to bottom. Only the highest ball in these flasks are acessiable and can be attempted to be moved to a different flask. The balls can only be moved to a empty flask or one with the same color below the empty spot. In the picture to the right the only four valid moves in that senario are shown.
 
+
 Lastly, the amount of balls in the flasks can vary from level to level. I have limited this to a minimum of 1 ball to a max of 20. The same is true for the flasks. The game gives you 2 emtpy flasks each level. All the other flasks given in the level are always completely full.
 
 ## The idea
 After I got stuck on multiple levels and just could not figure out how I could solve them I figured I should be able to make a python script that can solve it for me. The idea I had was to just brute force it. Starting at the first flask and just attempting all the possible combinations until I found one that solved the puzzle.
+
 [The code can be found here](ColorSortSolver.py)
 
 ## Problems
@@ -85,6 +87,7 @@ def repeating_moves():
 ```
 ### Loops
 The program had the tendency to figure out a series of steps that could be repeated indefinitly without changing anything. This is not something that is desireable. I had to write a piece of code that would figure out when a loop like that happened and then return a number of the amount of steps to undo.
+
 The code looks for the biggest loop possible. Meaning that if you give it a loop that has been repeated four times it will tell you the loop is 2x loop lengths long. Which results in two of the loops remaining. This will not cause any problems because it checks every step for loops, so it will find the first loop that gets made.
 
 ```python
@@ -106,6 +109,7 @@ def detect_loop(steps):
 ```
 ### Bouncing
 Bouncing is the act of moving the ball back where it came from. The computer would sometimes get stuck moving a single red ball from flask A to B, a blue one from C to D and then move the red one back. Doing every single step towards solving with the swapping of the red ball inbetween, since this just about did not loop but was quite useless.
+
 The code I wrote looks into all the previous steps and find the last most step in which one, or both, the flasks has been used to move with (both to and from). If they have been touched it looks to see it the current move undos the move that was done back then. Should the move indeed undo that move it is not allowed. Any other move is allowed. Like moving all the red balls from flask A to B.
 
 ```python
@@ -130,8 +134,11 @@ def bouncing(steps):
 ```
 ### Skipping
 This one is interesting. It does not really affect the amount of steps you need to do before the solution. But rather the speed in which it solves the problem. It skipes certain attempts to find solutions.
+
 It checks the color of the ball you are holding. Then it determains if somewhere in the solution there is a flask entirely filled with that color (and voids). If it finds multiple it picks the first one that has the highest stack (if two have 3 balls it picks the first, but it picks the second when it has 2 and 3 balls.) If no flask is found the first empty one is picked instead.
+
 Should the program try to drop in one of the flasks that has been detected (so, either empty or filled with only that color) but not picked, it will skip that flask.
+
 This prevents the program from trying to drop the first ball it moved to the first empty flask. From also trying to do it with the second one. And attempting the same solution that failed with just the last 2 flasked swiched around.
 ```python
 def skipping(steps):
@@ -185,6 +192,7 @@ def skipping(steps):
 ```
 ### Twice Twice
 The name is from a joke. The joke is about a person doing the same thing more then once yet different things happen. This code does something slightly different. It looks at the previous steps and looks to see if the step you are taking now, lets say A to B, can not be compressed with a previous step, C to A. If it can it says to skip it here so later it can merge the two.
+
 The program had, and still has in come capacity. The tendency to move balls to the first flask and to then immidiatly after move them out of it to a different one.
 ```python
 def twice_twice(steps):
