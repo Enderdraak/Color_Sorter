@@ -4,6 +4,10 @@ This is a python program that allows you to find solutions for a game in which y
 ## Table of index
  * [The game](#the-game)
  * [The idea](#the-idea)
+ * [Problems](#problems)
+  * [Recursive](#recursive)
+  * [Loops](#loops)
+  * [Bouncing](#bouncing)
 
 ## The game
 <img src="./Pictures/Valid moves.png" width="25%" align="right">
@@ -75,4 +79,47 @@ def repeating_moves():
                                         
     #return the final info
     return steps
+```
+### Loops
+The program had the tendency to figure out a series of steps that could be repeated indefinitly without changing anything. This is not something that is desireable. I had to write a piece of code that would figure out when a loop like that happened and then return a number of the amount of steps to undo.
+The code looks for the biggest loop possible. Meaning that if you give it a loop that has been repeated four times it will tell you the loop is 2x loop lengths long. Which results in two of the loops remaining. This will not cause any problems because it checks every step for loops, so it will find the first loop that gets made.
+
+```python
+def detect_loop(steps):
+
+    #detect if a series of steps get repeated and detect the size of that loop
+    biggest_loop = False
+    for i in range(2,int((len(steps)+2)/2),2):
+        test_steps = steps[:i*-1]
+        if test_steps[i*-1:] == steps[i*-1:] and i > 2:
+            detection_list = [[0 for j in range(map_data("flasks")+2)],[0 for j in range(map_data("flasks")+2)]]
+            for k in range(0,i,2):
+                detection_list[0][steps[(k+1)*-1]] += 1
+                detection_list[1][steps[(k+2)*-1]] += 1
+            if detection_list[0] == detection_list[1]:
+                biggest_loop = i
+    return biggest_loop
+```
+### Bouncing
+Bouncing is the act of moving the ball back where it came from. The computer would sometimes get stuck moving a single red ball from flask A to B, a blue one from C to D and then move the red one back. Doing every single step towards solving with the swapping of the red ball inbetween, since this just about did not loop but was quite useless.
+The code I wrote looks into all the previous steps and find the last most step in which one, or both, the flasks has been used to move with (both to and from). If they have been touched it looks to see it the current move undos the move that was done back then. Should the move indeed undo that move it is not allowed. Any other move is allowed. Like moving all the red balls from flask A to B.
+
+```python
+def bouncing(steps):
+        
+    #put in the test to check for bouncing. It can redo moves, but it can not undo moves if both piles have not been changed since then.
+    bouncing = 0
+    for action in range(2,len(steps),2):
+        test_step = [steps[(action+2)*-1], steps[(action+1)*-1]]
+        if test_step[0] == steps[-1] or test_step[0] == steps[-2]:
+            bouncing = 1
+        if test_step[1] == steps[-1] or test_step[1] == steps[-2]:
+            bouncing = 1
+        if test_step[0] == steps[-1] and test_step[1] == steps[-2]:
+            bouncing = 2
+        if bouncing != 0:
+            break
+    if bouncing <= 1:
+        return False
+    return True
 ```
