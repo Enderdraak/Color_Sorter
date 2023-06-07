@@ -133,6 +133,8 @@ def check_complete():
     return victory
 
 def detect_loop(steps):
+    """Returns a bolean based on if the Steps contain a looping part."""
+    
     #throw out the correct errors for debugging.
     if type(steps) != list:
         raise TypeError("steps is not a list")
@@ -158,6 +160,7 @@ def detect_loop(steps):
     return biggest_loop
 
 def bouncing(steps):
+    """Gives back a bolean based on if the new step would undo a previous move"""
 
     #throw out errors when shit is going down
     if type(steps) != list:
@@ -187,6 +190,7 @@ def bouncing(steps):
     return True
 
 def skipping(steps):
+    """Gives back a bool based on if the current flask you want to put it in better off skipped"""
     
     #throw out errors when shit is going down
     if type(steps) != list:
@@ -246,6 +250,8 @@ def skipping(steps):
     return data[steps[-1]][0] == 0 and first_void != steps[-1]
 
 def twice_twice(steps):
+    """Gives back a bolean based on if the new step could better be merged with a previous one."""
+
     #throw out errors when shit is going down
     if type(steps) != list:
         raise TypeError("steps is not a list")
@@ -311,6 +317,7 @@ def full_flask(steps):
 
 steps = [0,0]
 def repeating_moves():
+    """Calculates a solution to the problem given in the global data variable. The solution comes in a list of steps"""
 
     global steps
     steps = [-2,-2]
@@ -545,7 +552,7 @@ def flask_screen():
     cv.update()
 
 def ball_draw(x, y, color):
-    screen_storage.append(cv.create_arc(x,y,60+x,60+y,start=0,extent=359,width=2,fill=color,style=CHORD))
+    screen_storage.append(cv.create_arc(x,y,60+x,60+y,start=90,extent=359,width=2,fill=color,style=CHORD))
     return screen_storage[-1]
 
 def flask_row(x, y, count):
@@ -596,6 +603,22 @@ def solution_buttons(state = False):
         screen_storage.append(cv.create_text(1295,780,text="apply gravity"))
         solve_buttons_values = screen_storage[-4:]
 
+
+
+#Text at the bottom of the screen
+text_values = []
+def set_text_to(string = False):
+    global text_values
+    if type(string) == bool:
+        for x in text_values:
+            cv.delete(x)
+        text_values = []
+    else:
+        for x in text_values:
+            cv.delete(x)
+        screen_storage.append(cv.create_text(700,750,text=string,font = ['TkDefaultFont', '40', 'bold']))
+        text_values = screen_storage[-1:]
+    
 #deletes everything on the screen
 def canvas_clearer():
     global screen_storage
@@ -636,6 +659,8 @@ def click(event):
         start_screen()
         return
 
+    set_text_to()
+
     #only do the following if no solution is present
     if len(solution) == 0:
         #check if you clicked a ball
@@ -668,8 +693,11 @@ def click(event):
             solution = repeating_moves()
             if solution == False:
                 #no solution found
-                print("no solution found")
+                set_text_to("no solution found")
                 solution = []
+            elif solution == []:
+                #the problem is already the solved state
+                set_text_to("problem already solved")
             else:
                 for action in range(0,len(solution),2):
                     action1 = (action + 1) * -1
@@ -677,8 +705,8 @@ def click(event):
                 solution_buttons(True)
                 select_box(0,0,True)
                 select = 0
-                print(solution)
-                print(data)
+                #print(solution)
+                #print(data)
         if clicked[0] >= 1200 and clicked[0] <= 1390 and clicked[1] >= 770 and clicked[1] <= 790:
             gravity()
 
@@ -695,6 +723,7 @@ def click(event):
 
 #move the solution forwards
 def forward(event=False):
+    set_text_to()
     global solution
     if len(solution) == 0:
         return False
@@ -711,6 +740,7 @@ def forward(event=False):
 
 #move the solution backwards
 def backward(event=False):
+    set_text_to()
     global solution
     if len(solution) == 0:
         return False
@@ -725,6 +755,7 @@ def backward(event=False):
         select -= 2
 
 def gravity(event=False):
+    set_text_to()
     #makes all the balls fall down to the lowest positions in the flask
     for flask in range(len(data)):
         empty_levels = []

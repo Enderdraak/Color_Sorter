@@ -188,11 +188,65 @@ class TestMapData(unittest.TestCase):
         self.assertRaises(ValueError, CSS.full_flask, [2,3,4])
         self.assertRaises(ValueError, CSS.full_flask, [0,1,1,45,45,1,1,0,0,1,1,45,45,1,1,0])
 
-    def test_repeating_moves(self):
+    def is_solved(self, data):
+        if type(data) != list:
+            raise TypeError("Data is no list")
+        for flask in data:
+            if type(flask) != list:
+                raise TypeError("flask is no list")
+            for ball in flask:
+                if type(ball) != str and type(ball) != int:
+                    raise TypeError("ball is no string or interger")
+                if ball != flask[0]:
+                    return False
+        return True
+
+    def test_is_solved(self):
+        self.assertTrue(self.is_solved([["red","red","red","red","red"],["blue3","blue3","blue3","blue3","blue3"],[0,0,0,0,0],[0,0,0,0,0]]))
+        self.assertTrue(self.is_solved([[0,0,0,0,0],["red","red","red","red","red"],[0,0,0,0,0],["blue3","blue3","blue3","blue3","blue3"]]))
+        self.assertFalse(self.is_solved([["red","red","red","red","red"],["blue3","blue3","blue3",0,"blue3"],[0,0,0,0,0],[0,0,0,0,0]]))
+        self.assertFalse(self.is_solved([[0,0,"red",0,0],["red","red","red","red","red"],[0,0,0,0,0],["blue3","blue3","blue3","blue3","blue3"]]))
+        self.assertFalse(self.is_solved([["red","red","red","red","red"],["blue3","blue3","blue3","blue3","blue3"],["blue3",0,0,0,0],[0,0,0,0,0]]))
+
+    def test_is_solved_errors(self):
+        self.assertRaises(TypeError, self.is_solved, [2.4,2.3])
+        self.assertRaises(TypeError, self.is_solved, "test")
+        self.assertRaises(TypeError, self.is_solved, [[0,0,0],2.3])
+        self.assertRaises(TypeError, self.is_solved, [[0,0,0],[2.5,0,0]])
+        self.assertFalse(self.is_solved([[0,0,3],[2.5,0,0]]))
+
+    def test_repeating_moves_solveble(self):
         CSS.data = [["red","red","red",0,0],["blue3","blue3","blue3","red","blue3"],["red","blue3",0,0,0],[0,0,0,0,0]]
         CSS.map_data_persistent = [2, 5]
-        self.assertEqual(CSS.repeating_moves(), [1, 2, 1, 0, 2, 1, 2, 1, 2, 0])
-        self.assertEqual(CSS.repeating_moves(), [1, 2, 0, 1, 2, 3, 2, 3, 2, 0, 1, 0, 1, 0, 3, 1, 3, 1])
+        self.assertEqual(len(CSS.repeating_moves())%2, 0)
+        self.assertTrue(self.is_solved(CSS.data)) #tests the end state on a solved state
+        CSS.data = [["red","red","red",0,0],["blue3","blue3","blue3",0,0],["red","blue3",0,0,0],["red","blue3",0,0,0]]
+        self.assertEqual(len(CSS.repeating_moves())%2, 0)
+        self.assertTrue(self.is_solved(CSS.data))
+        CSS.data = [["red","blue3","red","red","red"],["blue3","blue3","blue3","red","blue3"],[0,0,0,0,0],[0,0,0,0,0]]
+        self.assertEqual(len(CSS.repeating_moves())%2, 0)
+        self.assertTrue(self.is_solved(CSS.data))
+        
+    def test_repeating_moves_solved(self):
+        CSS.data = [["red","red","red","red","red"],["blue3","blue3","blue3","blue3","blue3"],[0,0,0,0,0],[0,0,0,0,0]]
+        CSS.map_data_persistent = [2, 5]
+        self.assertEqual(CSS.repeating_moves(), [])
+        self.assertTrue(self.is_solved(CSS.data)) #tests the end state on a solved state
+        CSS.data = [["red","red","red","red","red"],["yellow","yellow","yellow","yellow","yellow"],["fkel","fkel","fkel","fkel","fkel"],[5,5,5,5,5]]
+        CSS.map_data_persistent = [2, 5]
+        self.assertEqual(CSS.repeating_moves(), [])
+        self.assertTrue(self.is_solved(CSS.data)) #tests the end state on a solved state
+
+    def test_repeating_moves_unsolveble(self):
+        CSS.data = [["green2","green2","red"],["blue3","blue3","red"],["yellow","yellow","red"],["green2",0,0],["blue3",0,0],["yellow",0,0]]
+        CSS.map_data_persistent = [4, 3]
+        self.assertFalse(CSS.repeating_moves())
+        self.assertFalse(self.is_solved(CSS.data)) #tests the end state on a solved state
+        CSS.data = [["red","red","red","red","red"],["blue3","blue3","blue","blue3","blue3"],[0,0,0,0,0],[0,0,0,0,0]]
+        CSS.map_data_persistent = [2, 5]
+        self.assertFalse(CSS.repeating_moves())
+        self.assertFalse(self.is_solved(CSS.data)) #tests the end state on a solved state
+
 
         
 if __name__ == '__main__':
